@@ -135,6 +135,33 @@ AgregarVariables_IntraMes <- function(dataset) {
   
   
   # *************************************************************
+  # Agrego las variables que me parecen utiles
+  # *************************************************************
+  
+  dataset[, t_transacciones := ctrx_quarter + Master_cconsumos + Visa_cconsumos]
+  dataset[, t_movimientos_voluntarios := ctrx_quarter + ctarjeta_visa_transacciones + ctarjeta_master_transacciones]
+  dataset[, i_transacciones := (t_transacciones - mean(t_transacciones,na.rm = TRUE )) / sd(t_transacciones,na.rm = TRUE) ]
+  dataset[, i_t_movimientos_voluntarios := (t_movimientos_voluntarios - mean(t_movimientos_voluntarios,na.rm = TRUE )) / sd(t_movimientos_voluntarios,na.rm = TRUE) ]
+  dataset[, t_pasivo_corr := vm_mconsumospesos+
+            mprestamos_personales+
+            mprestamos_prendarios+
+            mprestamos_hipotecarios+
+            mcuenta_debitos_automaticos+
+            mttarjeta_master_debitos_automaticos+
+            mpagodeservicios+
+            mpagomiscuentas+
+            mcomisiones_mantenimiento+
+            mcomisiones_otras]
+  dataset[, t_prestamos := mprestamos_personales + mprestamos_prendarios +
+            mprestamos_hipotecarios]
+  dataset[, i_rentabilidad_prestamos := mrentabilidad_annual / t_prestamos]
+  dataset[ ,ratio_ahorro :=   ifelse( (mtransferencias_recibidas + mpayroll + mpayroll2 + mcheques_depositados   )!=0, 
+                                      (mcuentas_saldo + mplazo_fijo_dolares + mplazo_fijo_pesos + minversion1_pesos + 
+                                         minversion1_dolares + minversion2) / ( mtransferencias_recibidas + mpayroll + 
+                                                                                  mpayroll2 + mcheques_depositados   ), NA) ]
+  
+  
+  # *************************************************************
   
   
   # valvula de seguridad para evitar valores infinitos
