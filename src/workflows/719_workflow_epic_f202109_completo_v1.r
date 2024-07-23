@@ -181,8 +181,8 @@ FErf_attributes_base <- function( pinputexps, ratio, desvio)
   param_local$lgb_param <- list(
     # parametros que se pueden cambiar
     num_iterations = 50, #20
-    num_leaves  = 50, #16
-    min_data_in_leaf = 1000,
+    num_leaves  = 40, #16
+    min_data_in_leaf = 150,
     feature_fraction_bynode  = 0.1, #0.2
 
     # para que LightGBM emule Random Forest
@@ -432,10 +432,10 @@ wf_septiembre <- function( pnombrewf )
   DT_incorporar_dataset_competencia2024()
   CA_catastrophe_base( metodo="MachineLearning")
   FEintra_manual_base()
-  DR_drifting_base(metodo="rank_cero_fijo")
+  DR_drifting_base(metodo="dolarblue")
   FEhist_base()
   FErf_attributes_base()
-  CN_canaritos_asesinos_base(ratio=0.8, desvio=-2.0)
+  CN_canaritos_asesinos_base(ratio=0.8, desvio=-1.0)
 
   ts9 <- TS_strategy_base9()
   ht <- HT_tuning_epic()
