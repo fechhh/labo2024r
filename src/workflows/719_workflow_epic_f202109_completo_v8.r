@@ -429,7 +429,7 @@ wf_septiembre <- function( pnombrewf )
   param_local <- exp_wf_init( pnombrewf ) # linea fija
 
   DT_incorporar_dataset_competencia2024()
-  CA_catastrophe_base( metodo="ninguno")
+  CA_catastrophe_base( metodo="MachineLearning")
   FEintra_manual_base()
   DR_drifting_base(metodo="ninguno")
   FEhist_base()
