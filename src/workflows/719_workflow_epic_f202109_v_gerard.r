@@ -113,7 +113,7 @@ DR_drifting_base <- function( pinputexps, metodo)
   if( -1 == (param_local <- exp_init())$resultado ) return( 0 ) # linea fija
 
 
-  param_local$meta$script <- "/src/wf-etapas/1401_DR_corregir_drifting_fg.r"
+  param_local$meta$script <- "/src/wf-etapas/z1401_DR_corregir_drifting.r"
 
   # valores posibles
   #  "ninguno", "rank_simple", "rank_cero_fijo", "deflacion", "estandarizar"
@@ -134,7 +134,7 @@ FEhist_base <- function( pinputexps)
   param_local$meta$script <- "/src/wf-etapas/z1501_FE_historia.r"
 
   param_local$lag1 <- TRUE
-  param_local$lag2 <- TRUE  # no me engraso con los lags de orden 2
+  param_local$lag2 <- TRUE # no me engraso con los lags de orden 2
   param_local$lag3 <- TRUE # no me engraso con los lags de orden 3
 
   # no me engraso las manos con las tendencias
@@ -174,16 +174,16 @@ FErf_attributes_base <- function( pinputexps, ratio, desvio)
   param_local$meta$script <- "/src/wf-etapas/z1311_FE_rfatributes.r"
 
   # Parametros de un LightGBM que se genera para estimar la column importance
-  param_local$train$clase01_valor1 <- c( "BAJA+2")#, "BAJA+1")
-  param_local$train$training <- c( 202101, 202102, 202103,    202104, 202105)
+  param_local$train$clase01_valor1 <- c( "BAJA+2", "BAJA+1")
+  param_local$train$training <- c( 202101, 202102, 202103)
 
   # parametros para que LightGBM se comporte como Random Forest
   param_local$lgb_param <- list(
     # parametros que se pueden cambiar
-    num_iterations = 60, #20
-    num_leaves  = 50, #16
-    min_data_in_leaf = 150,
-    feature_fraction_bynode  = 0.1, #0.2
+    num_iterations = 60,
+    num_leaves  = 50,
+    min_data_in_leaf = 120,
+    feature_fraction_bynode  = 0.1,
 
     # para que LightGBM emule Random Forest
     boosting = "rf",
@@ -261,17 +261,17 @@ TS_strategy_base9 <- function( pinputexps )
 
   param_local$meta$script <- "/src/wf-etapas/z2101_TS_training_strategy.r"
 
-  param_local$future <- c(202107)
-  
+  param_local$future <- c(202109)
+
   param_local$final_train$undersampling <- 1.0
-  param_local$final_train$clase_minoritaria <- c( "BAJA+1", "BAJA+2")
+  param_local$final_train$clase_minoritaria <- c("BAJA+2")
   param_local$final_train$training <- c(202105,202104,202103,202102,202101,
                                         202012,202011,202010,202009,202009,202001,
                                         201912,201911,
                                         201909,201908,201907,201906,
                                         201904,201903,201902,201901)
-  
-  
+
+
   param_local$train$training <- c(202105,202104,202103,202102,202101,
                                   202012,202011,202010,202009,202009,202001,
                                   201912,201911,
@@ -279,14 +279,12 @@ TS_strategy_base9 <- function( pinputexps )
                                   201904,201903,201902,201901)
   param_local$train$validation <- c(202106)
   param_local$train$testing <- c(202107)
-  
-  
+
+
   # Atencion  0.2  de  undersampling de la clase mayoritaria,  los CONTINUA
   # 1.0 significa NO undersampling
-  param_local$train$undersampling <- 0.3
-  param_local$train$clase_minoritaria <- c( "BAJA+1", "BAJA+2")
-  
-  
+  param_local$train$undersampling <- 0.2
+  param_local$train$clase_minoritaria <- c("BAJA+2") # SIN BAJA+1
 
   return( exp_correr_script( param_local ) ) # linea fija
 }
@@ -311,7 +309,7 @@ HT_tuning_epic <- function( pinputexps, bypass=FALSE)
   param_local$train$gan0 <-  -3000
   param_local$train$meseta <- 2001
   param_local$train$repeticiones_exp <- 1
-  param_local$train$semillerio <- 3  # 1 es no usar semillerio en la Bayesian Optimi
+  param_local$train$semillerio <- 1  # 1 es no usar semillerio en la Bayesian Optimi
 
   # Hiperparametros  del LightGBM
   #  los que tienen un solo valor son los que van fijos
@@ -437,15 +435,15 @@ wf_septiembre <- function( pnombrewf )
   DT_incorporar_dataset_competencia2024()
   CA_catastrophe_base( metodo="MachineLearning")
   FEintra_manual_base()
-  #DR_drifting_base(metodo="ninguno")
+  DR_drifting_base(metodo="rank_cero_fijo")
   FEhist_base()
   FErf_attributes_base()
-  CN_canaritos_asesinos_base(ratio=0.2, desvio=0.)
+  #CN_canaritos_asesinos_base(ratio=0.2, desvio=4.0)
 
   ts9 <- TS_strategy_base9()
   ht <- HT_tuning_epic()
 
-  fm <- FM_final_models_lightgbm_semillerio( c(ht, ts9), ranks=c(1), semillerio=10, repeticiones_exp=3 )
+  fm <- FM_final_models_lightgbm_semillerio( c(ht, ts9), ranks=c(1), semillerio=20, repeticiones_exp=1 )
   SC_scoring_semillerio( c(fm, ts9) )
   KA_evaluate_kaggle_semillerio()
 
